@@ -1,0 +1,15 @@
+Source: coremetry
+Section: contrib
+Priority: extra
+Maintainer: Maciej Nabozny <maciej.nabozny@cloudover.io>
+Build-Depends: debhelper (>= 8.0.0), dh-systemd
+Standards-Version: 3.9.4
+Homepage: http://cloudover.org/
+
+Package: coremetry
+Architecture: all
+Depends: corecluster
+Suggests: tcpdump, ipython, traceroute
+Description: Resource monitoring suite for CoreCluster
+ Suite for monitoring resources allocated with CoreCluster
+
