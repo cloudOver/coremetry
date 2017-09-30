@@ -4,7 +4,7 @@ MODULE = {
     ],
     'models': [
         'coremetry.models.coremetry',
-    ]
+    ],
     'hooks': {
         'cron.minute': ['coremetry.hooks.monitor'],
     },

@@ -41,7 +41,7 @@ import libvirt
 
 class Hook(NetworkMixin, OsMixin, ApiMixin, HookInterface):
     task = None
-    def _store(self, resource_type_name, resource_id, value):
+    def _store(self, resource_type_name, resource_id, value, owner=None):
         try:
             res_type = ResourceType.objects.get(name=resource_type_name)
         except:
@@ -54,6 +54,7 @@ class Hook(NetworkMixin, OsMixin, ApiMixin, HookInterface):
             res = Resource()
             res.resource_type = res_type
             res.object_id = resource_id
+            res.user = owner
             res.save()
 
         record = Record()
@@ -100,11 +101,11 @@ class Hook(NetworkMixin, OsMixin, ApiMixin, HookInterface):
         dom = conn.lookupByName(vm.libvirt_name)
 
         cpu_stats = dom.getCPUStats(True)
-        self._store('vm_memory_used', vm.id, dom.memoryStats()['rss'])
-        self._store('vm_cpu_time', vm.id, cpu_stats['cpu_time'])
-        self._store('vm_system_time', vm.id, cpu_stats['system_time'])
-        self._store('vm_user_time', vm.id, cpu_stats['user_time'])
-        self._store('vm_cpu_time', vm.id, dom.info()[4])
+        self._store('vm_memory_used', vm.id, dom.memoryStats()['rss'], vm.user)
+        self._store('vm_cpu_time', vm.id, cpu_stats['cpu_time'], vm.user)
+        self._store('vm_system_time', vm.id, cpu_stats['system_time'], vm.user)
+        self._store('vm_user_time', vm.id, cpu_stats['user_time'], vm.user)
+        self._store('vm_cpu_time', vm.id, dom.info()[4], vm.user)
 
         tree = ElementTree.fromstring(dom.XMLDesc())
         for interface in tree.findall('devices/interface'):
@@ -112,17 +113,17 @@ class Hook(NetworkMixin, OsMixin, ApiMixin, HookInterface):
             dev_stats = dom.interfaceStats(dev_name)
 
             network_name = interface.find('source').get('network').split('-')[1]
-            self._store('vm_net_in_bytes_' + network_name, vm.id, dev_stats[0])
-            self._store('vm_net_in_packets_' + network_name, vm.id, dev_stats[1])
-            self._store('vm_net_out_bytes_' + network_name, vm.id, dev_stats[4])
-            self._store('vm_net_out_packets_' + network_name, vm.id, dev_stats[5])
+            self._store('vm_net_in_bytes_' + network_name, vm.id, dev_stats[0], vm.user)
+            self._store('vm_net_in_packets_' + network_name, vm.id, dev_stats[1], vm.user)
+            self._store('vm_net_out_bytes_' + network_name, vm.id, dev_stats[4], vm.user)
+            self._store('vm_net_out_packets_' + network_name, vm.id, dev_stats[5], vm.user)
 
         for disk in tree.findall('devices/disk'):
             dev_name = disk.find('target').get('dev')
             dev_stats = dom.blockStats(dev_name)
 
-            self._store('vm_disk_read_bytes_' + dev_name, vm.id, dev_stats[1])
-            self._store('vm_disk_write_bytes_' + dev_name, vm.id, dev_stats[3])
+            self._store('vm_disk_read_bytes_' + dev_name, vm.id, dev_stats[1], vm.user)
+            self._store('vm_disk_write_bytes_' + dev_name, vm.id, dev_stats[3], vm.user)
 
     def _monitor_storage(self, storage, conn):
         st = conn.storagePoolLookupByName(storage.name)
