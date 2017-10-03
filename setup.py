@@ -6,7 +6,7 @@ from distutils.command.install import install as _install
 setup(
   name = 'coremetry',
   packages = find_packages(exclude=['config']),
-  version = '17.10.01',
+  version = '17.10.04',
   description = 'Monitoring suite for CoreCluster',
   author = 'Maciej Nabozny',
   author_email = 'maciej.nabozny@cloudover.io',

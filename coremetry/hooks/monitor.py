@@ -26,7 +26,6 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-
 from corenetwork.network_mixin import NetworkMixin
 from corenetwork.os_mixin import OsMixin
 from corenetwork.api_mixin import ApiMixin
@@ -35,21 +34,20 @@ from corenetwork.utils.logger import log
 from corecluster import settings
 import importlib
 
+
 class Hook(NetworkMixin, OsMixin, ApiMixin, HookInterface):
     task = None
 
     def cron(self, interval):
-        for app_name in settings.INSTALLED_APPS:
+        for app_name in settings.APPS:
             app = importlib.import_module(app_name).MODULE
-            if 'models' in app:
-                for model in app['models']:
+            if 'coremetry' in app:
+                for coremetry_module in app['coremetry']:
                     try:
-                        module = importlib.import_module(model)
+                        log(msg='Monitoring ' + coremetry_module)
+                        module = importlib.import_module(coremetry_module)
                         module.monitor()
                     except Exception as e:
-                        try:
-                            log(msg='Failed to load coremetry module %s' % model, exception=e,
-                                tags=('error', 'critical'))
-                        except:
-                            print('Failed to load coremetry module %s from %s: %s' % (model, app_name, str(e)))
-                        raise Exception('db_model_not_found')
+                        log(msg='Failed to call coremetry module %s' % coremetry_module, exception=e,
+                            tags=('error', 'critical'))
+                        print('Failed to call coremetry module %s from %s: %s' % (coremetry_module, app_name, str(e)))
