@@ -1,6 +1,6 @@
 from coremetry.models.coremetry.resource_type import ResourceType
-from corecluster.models.common_models import CoreModel, UserMixin
 from django.db import models
+from corecluster.models.common_models import CoreModel, UserMixin
 
 
 class Resource(CoreModel, UserMixin):

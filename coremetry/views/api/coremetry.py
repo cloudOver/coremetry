@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from corecluster.utils import validation as v
 from corecluster.utils.decorators import register
 from corecluster.utils.exception import CoreException
-from coremetry.models.coremetry import ResourceType, Resource
+import coremetry.models.coremetry
 
 
 @register(auth='token')
@@ -38,7 +38,7 @@ def list_resources(context):
     """
     Get list of monitored resources available for user
     """
-    return [r.name for r in ResourceType.objects.all()]
+    return [r.name for r in coremetry.models.coremetry.ResourceType.objects.all()]
 
 
 
@@ -49,7 +49,7 @@ def list_records(context, resource_type, object_id):
     Get list of records for given resource type and object id
     """
     try:
-        res_type = ResourceType.objects.get(name=resource_type)
+        res_type = coremetry.models.coremetry.ResourceType.objects.get(name=resource_type)
     except:
         raise CoreException('resource_type_not_found')
 
